@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cart | SG Store</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .cart-container {
+      padding: 40px 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+
+    th, td {
+      padding: 15px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    .remove-btn {
+      background-color: #dc3545;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .remove-btn:hover {
+      background-color: #c82333;
+    }
+
+    .total {
+      font-size: 20px;
+      font-weight: bold;
+      text-align: right;
+    }
+
+    .product-img {
+      width: 60px;
+      height: auto;
+      display: block;
+      margin: 0 auto 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="logo">SG Store</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="#">Products</a></li>
+      <li><a href="cart.html">Cart</a></li>
+      <li><a href="#">Login</a></li>
+    </ul>
+  </nav>
+
+  <div class="cart-container">
+    <h2>Your Cart</h2>
+    <table id="cart-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Price ($)</th>
+          <th>Quantity</th>
+          <th>Subtotal ($)</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="cart-body"></tbody>
+    </table>
+    <div class="total" id="cart-total">Total: $0.00</div>
+  </div>
+
+  <script>
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    function renderCart() {
+      const cartBody = document.getElementById("cart-body");
+      const cartTotal = document.getElementById("cart-total");
+      cartBody.innerHTML = "";
+
+      let total = 0;
+
+      cart.forEach((item, index) => {
+        const subtotal = item.price * item.quantity;
+        total += subtotal;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>
+            <img src="${item.image}" alt="${item.name}" class="product-img">
+            ${item.name}
+          </td>
+          <td>${item.price.toFixed(2)}</td>
+          <td>
+            <input type="number" min="1" value="${item.quantity}" data-index="${index}" class="qty-input"/>
+          </td>
+          <td>${subtotal.toFixed(2)}</td>
+          <td><button class="remove-btn" data-index="${index}">Remove</button></td>
+        `;
+        cartBody.appendChild(row);
+      });
+
+      cartTotal.textContent = `Total: $${total.toFixed(2)}`;
+
+      document.querySelectorAll(".qty-input").forEach(input => {
+        input.addEventListener("change", (e) => {
+          const index = e.target.dataset.index;
+          const value = parseInt(e.target.value);
+          if (value >= 1) {
+            cart[index].quantity = value;
+            localStorage.setItem("cart", JSON.stringify(cart));
+            renderCart();
+          }
+        });
+      });
+
+      document.querySelectorAll(".remove-btn").forEach(button => {
+        button.addEventListener("click", () => {
+          const index = button.dataset.index;
+          cart.splice(index, 1);
+          localStorage.setItem("cart", JSON.stringify(cart));
+          renderCart();
+        });
+      });
+    }
+
+    renderCart();
+  </script>
+
+</body>
+</html>
